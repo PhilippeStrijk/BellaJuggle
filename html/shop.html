@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <section class="shop-container">
+      <!-- Sidebar Filters -->
+      <aside class="filters" aria-label="Product Filters">
+        <h3>Filter By</h3>
+        <div class="filter-section">
+      <details class="filter-dropdown" open>
+        <summary>Price Range</summary>
+        <div class="dropdown-content">
+          <div id="price-slider"></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="filter-section">
+      <details class="filter-dropdown">
+        <summary>Color</summary>
+        <div class="dropdown-content">
+          <label><input type="checkbox" name="color" value="yellow" /> Yellow</label>
+          <label><input type="checkbox" name="color" value="orange" /> Orange</label>
+          <label><input type="checkbox" name="color" value="green" /> Green</label>
+          <label><input type="checkbox" name="color" value="darkgreen" /> Dark Green</label>
+        </div>
+      </details>
+    </div>
+
+    <div class="filter-section">
+      <details class="filter-dropdown">
+        <summary>Category</summary>
+        <div class="dropdown-content">
+          <label><input type="checkbox" name="category" value="fruits" /> Fruits</label>
+          <label><input type="checkbox" name="category" value="vegetables" /> Vegetables</label>
+          <label><input type="checkbox" name="category" value="spices" /> Spices</label>
+        </div>
+      </details>
+    </div>
+  </aside>
+
+  </div>
+</div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="sort-bar" aria-label="Sort Products">
+          <label for="sort-select">Sort by:</label>
+          <select id="sort-select" name="sort">
+            <option value="default">Default</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="name-asc">Name: A to Z</option>
+            <option value="name-desc">Name: Z to A</option>
+          </select>
+        </div>
+
+        <section class="products">
+          <h2>Shop All Products</h2>
+          <div class="product-list">
+            <!-- Example Product -->
+            <article class="product" data-price="25" data-color="yellow" data-type="balls">
+        <img src="https://placehold.co/300x200/FA8F37/FFF5DD?text=Juggling Balls" alt="Juggling Balls">
+              <h4>Professional Juggling Balls</h4>
+              <p>High-quality balls designed for perfect grip and balance.</p>
+              <p class="price">$25.00</p>
+              <button>Add to Cart</button>
+            </article>
+
+            <article class="product" data-price="40" data-color="orange" data-type="clubs">
+        <img src="https://placehold.co/300x200/309639/FFF5DD?text=Juggling Clubs" alt="Juggling Clubs">
+              <h4>Juggling Clubs</h4>
+              <p>Durable clubs ideal for beginners and pros alike.</p>
+              <p class="price">$40.00</p>
+              <button>Add to Cart</button>
+            </article>
+
+            <!-- Add remaining 18 products with appropriate data attributes -->
+
+            <!-- (For brevity, just repeat these two for now, but you can add all 20 like before) -->
+          </div>
+        </section>
+      </div>
+
+    </section>
+{% endblock %}
+
+
+{% block scripts %}
+  <!-- load noUiSlider and your custom JS here -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+  <script src="{{ url_for('static', filename='js/price-filter.js') }}"></script>
+{% endblock %}
