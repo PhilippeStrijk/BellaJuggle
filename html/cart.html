@@ -4,60 +4,96 @@
   <main class="main-content">
     <h2>Your Cart</h2>
 
-    <div class="cart-items">
-      <div class="cart-item">
-        <div class="item-details">
-          <img src="placeholder.png" alt="Product Name" class="cart-item-image">
-          <div class="item-info">
-            <h4>Product Name</h4>
-            <p>Price: <span class="price">$25.00</span></p>
-          </div>
-        </div>
-        <div class="item-quantity">
-          <input type="number" value="1" min="1">
-        </div>
-        <div class="item-total">
-          $25.00
-        </div>
-        <button class="remove-item">Remove</button>
-      </div>
-
-      <div class="cart-item">
-        <div class="item-details">
-          <img src="placeholder.png" alt="Another Product" class="cart-item-image">
-          <div class="item-info">
-            <h4>Another Product</h4>
-            <p>Price: <span class="price">$50.00</span></p>
-          </div>
-        </div>
-        <div class="item-quantity">
-          <input type="number" value="2" min="1">
-        </div>
-        <div class="item-total">
-          $100.00
-        </div>
-        <button class="remove-item">Remove</button>
-      </div>
+    <div id="cart-items" class="cart-items">
+      <!-- Cart items will be injected here by JS -->
     </div>
 
-    <div class="cart-summary">
+    <div class="cart-summary" id="cart-summary">
       <div class="summary-line">
         <span>Subtotal</span>
-        <span>$125.00</span>
+        <span id="cart-subtotal">$0.00</span>
       </div>
       <div class="summary-line">
         <span>Shipping</span>
-        <span>$10.00</span>
+        <span id="cart-shipping">$10.00</span>
       </div>
       <div class="summary-line total">
         <span>Total</span>
-        <span>$135.00</span>
+        <span id="cart-total">$0.00</span>
       </div>
-      <button class="checkout-button">Proceed to Checkout</button>
+    <a href="{{ url_for('checkout') }}" class="checkout-button">Proceed to Checkout</a>
       <div class="continue-shopping">
         <a href="{{ url_for('shop') }}">Continue Shopping</a>
       </div>
     </div>
   </main>
 </div>
+
+<script type="module">
+  import { getCart, removeFromCart } from '/static/js/shop.js';
+
+  async function renderCart() {
+    const cartContainer = document.getElementById('cart-items');
+    const subtotalEl = document.getElementById('cart-subtotal');
+    const totalEl = document.getElementById('cart-total');
+    const shippingCost = 10;
+
+    cartContainer.innerHTML = 'Loading...';
+
+    try {
+      const cartItems = await getCart();
+
+      if (cartItems.length === 0) {
+        cartContainer.innerHTML = '<p>Your cart is empty.</p>';
+        subtotalEl.textContent = '$0.00';
+        totalEl.textContent = '$0.00';
+        return;
+      }
+
+      cartContainer.innerHTML = '';
+      let subtotal = 0;
+
+      cartItems.forEach(item => {
+        const price = Number(item.products.price);
+        const totalPrice = price * item.qty;
+        subtotal += totalPrice;
+
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <div class="item-details">
+            <img src="${item.products.image_url || 'placeholder.png'}" alt="${item.products.title}" class="cart-item-image">
+            <div class="item-info">
+              <h4>${item.products.title}</h4>
+              <p>Price: <span class="price">€${price.toFixed(2)}</span></p>
+            </div>
+          </div>
+          <div class="item-quantity">
+            <input type="number" value="${item.qty}" min="1">
+          </div>
+          <div class="item-total">
+            €${totalPrice.toFixed(2)}
+          </div>
+          <button class="remove-item">Remove</button>
+        `;
+
+        // Remove handler
+        div.querySelector('.remove-item').onclick = async () => {
+          await removeFromCart(item.id);
+          await renderCart();
+        };
+
+        cartContainer.appendChild(div);
+      });
+
+      subtotalEl.textContent = `€${subtotal.toFixed(2)}`;
+      totalEl.textContent = `€${(subtotal + shippingCost).toFixed(2)}`;
+
+    } catch (err) {
+      cartContainer.innerHTML = `<p style="color:red;">Error loading cart: ${err.message}</p>`;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', renderCart);
+</script>
 {% endblock %}

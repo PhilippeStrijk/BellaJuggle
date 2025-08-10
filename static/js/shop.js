@@ -43,6 +43,14 @@ export async function fetchProducts() {
   return data;
 }
 
+// Keep this function here. It will now be the centralized way to fetch
+// featured products, which other scripts can call.
+export async function fetchFeaturedProducts() {
+  const { data, error } = await supabase.from('products').select('*').limit(3);
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 export async function addProduct({ title, description, price, image_url }) {
   const { data, error } = await supabase.from('products').insert([{ title, description, price, image_url }]);
   if (error) throw error;
@@ -56,9 +64,70 @@ export async function deleteProduct(productId) {
 }
 
 // --- Cart (per-user) ---
+function getGuestCart() {
+  return JSON.parse(localStorage.getItem('guest_cart') || '[]');
+}
+
+function saveGuestCart(cart) {
+  localStorage.setItem('guest_cart', JSON.stringify(cart));
+}
+
+export async function addToCart(productId, qty = 1) {
+  const user = await getCurrentUser();
+  
+  if (!user) {
+    // Guest cart
+    let cart = getGuestCart();
+    const existing = cart.find(item => item.product_id === productId);
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      cart.push({ product_id: productId, qty });
+    }
+    saveGuestCart(cart);
+    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+    return;
+  }
+
+  // Logged-in cart (Supabase)
+  const { data: existing } = await supabase.from('carts').select('*')
+    .eq('user_id', user.id).eq('product_id', productId).maybeSingle();
+
+  if (existing) {
+    const { data, error } = await supabase.from('carts')
+      .update({ qty: existing.qty + qty }).eq('id', existing.id);
+    if (error) throw error;
+    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+    return data[0];
+  } else {
+    const { data, error } = await supabase.from('carts')
+      .insert([{ user_id: user.id, product_id: productId, qty }]);
+    if (error) throw error;
+    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+    return data[0];
+  }
+}
+
+
 export async function getCart() {
   const user = await getCurrentUser();
-  if (!user) return [];
+  if (!user) {
+    // Guest cart: fetch product details manually
+    const cart = getGuestCart();
+    if (cart.length === 0) return [];
+    const ids = cart.map(item => item.product_id);
+    const { data: products, error } = await supabase.from('products')
+      .select('*')
+      .in('id', ids);
+    if (error) throw error;
+    return cart.map(item => ({
+      id: item.product_id,
+      qty: item.qty,
+      products: products.find(p => p.id === item.product_id)
+    }));
+  }
+
+  // Logged-in cart from DB
   const { data, error } = await supabase
     .from('carts')
     .select('id, product_id, qty, added_at, products(*)')
@@ -67,38 +136,30 @@ export async function getCart() {
   return data;
 }
 
-export async function addToCart(productId, qty = 1) {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Not authenticated');
-
-  const { data: existing } = await supabase.from('carts').select('*')
-    .eq('user_id', user.id).eq('product_id', productId).maybeSingle();
-
-  if (existing) {
-    const { data, error } = await supabase.from('carts')
-      .update({ qty: existing.qty + qty }).eq('id', existing.id);
-    if (error) throw error;
-    return data[0];
-  } else {
-    const { data, error } = await supabase.from('carts')
-      .insert([{ user_id: user.id, product_id: productId, qty }]);
-    if (error) throw error;
-    return data[0];
-  }
-}
-
 export async function removeFromCart(cartRowId) {
-  const { data, error } = await supabase.from('carts').delete().eq('id', cartRowId);
-  if (error) throw error;
-  return data;
+  const user = await getCurrentUser();
+  if (!user) {
+    // Remove from guest cart
+    let cart = getGuestCart().filter(item => item.product_id !== cartRowId);
+    saveGuestCart(cart);
+    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+    return;
+  }
+  const { data, error } = await supabase.from('carts').delete().eq('id', cartRowId);
+  if (error) throw error;
+  window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+  return data;
 }
 
+
+// And also add it to your clearCart function
 export async function clearCart() {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Not authenticated');
-  const { data, error } = await supabase.from('carts').delete().eq('user_id', user.id);
-  if (error) throw error;
-  return data;
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+  const { data, error } = await supabase.from('carts').delete().eq('user_id', user.id);
+  if (error) throw error;
+  window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+  return data;
 }
 
 // --- Render products dynamically ---
@@ -169,9 +230,18 @@ function showCartMessage(msg) {
 
 // Toggle admin UI
 export async function applyAdminUI() {
-  const profile = await getProfile();
-  const isAdmin = profile?.is_admin;
-  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'inline-block' : 'none');
+  try {
+    const user = await getCurrentUser();
+    if (!user) return; // skip for guests
+
+    const profile = await getProfile();
+    const isAdmin = profile?.is_admin;
+    document.querySelectorAll('.admin-only').forEach(el =>
+      el.style.display = isAdmin ? 'inline-block' : 'none'
+    );
+  } catch (err) {
+    console.warn('applyAdminUI error:', err.message);
+  }
 }
 
 // Init
