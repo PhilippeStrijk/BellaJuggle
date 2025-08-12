@@ -30,6 +30,7 @@
           <textarea id="message" name="message" rows="5" required></textarea>
         </div>
         <button type="submit" class="btn-submit">Send Message</button>
+        <p id="form-status" class="form-status"></p>
       </form>
     </div>
 
@@ -68,4 +69,22 @@
     </div>
   </div>
 </div>
+
+<style>
+  .form-status {
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 0.95rem;
+  }
+  .form-status.success {
+    color: green;
+  }
+  .form-status.error {
+    color: red;
+  }
+</style>
+
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/contact.js') }}"></script>
 {% endblock %}

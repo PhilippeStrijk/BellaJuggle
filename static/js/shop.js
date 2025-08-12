@@ -1,4 +1,13 @@
-const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+// At the top of your file, assuming you have dotenv installed
+// and a file named .env in the root of your project with the following:
+// SUPABASE_URL=YOUR_SUPABASE_URL
+// SUPABASE_KEY=YOUR_SUPABASE_KEY
+require('dotenv').config();
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // --- Auth helpers ---
 export async function signUp(email, password, fullName = '') {
@@ -65,7 +74,16 @@ export async function deleteProduct(productId) {
 
 // --- Cart (per-user) ---
 function getGuestCart() {
-  return JSON.parse(localStorage.getItem('guest_cart') || '[]');
+  // This is a placeholder for your actual function.
+  // It should retrieve a cart from local storage or another source.
+  try {
+    // Corrected to use the 'guest_cart' key
+    const cart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
+    return cart;
+  } catch (e) {
+    console.error("Error parsing guest cart from local storage", e);
+    return [];
+  }
 }
 
 function saveGuestCart(cart) {
@@ -73,54 +91,64 @@ function saveGuestCart(cart) {
 }
 
 export async function addToCart(productId, qty = 1) {
-  const user = await getCurrentUser();
-  
-  if (!user) {
-    // Guest cart
-    let cart = getGuestCart();
-    const existing = cart.find(item => item.product_id === productId);
-    if (existing) {
-      existing.qty += qty;
-    } else {
-      cart.push({ product_id: productId, qty });
-    }
-    saveGuestCart(cart);
-    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
-    return;
-  }
+  const user = await getCurrentUser();
+  
+  if (!user) {
+    // Guest cart
+    let cart = getGuestCart();
+    const existing = cart.find(item => item.product_id === productId);
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      cart.push({ product_id: productId, qty });
+    }
+    saveGuestCart(cart);
+    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+    return;
+  }
 
-  // Logged-in cart (Supabase)
-  const { data: existing } = await supabase.from('carts').select('*')
-    .eq('user_id', user.id).eq('product_id', productId).maybeSingle();
+  // Logged-in cart (Supabase)
+  const { data: existing } = await supabase.from('carts').select('*')
+    .eq('user_id', user.id).eq('product_id', productId).maybeSingle();
 
-  if (existing) {
-    const { data, error } = await supabase.from('carts')
-      .update({ qty: existing.qty + qty }).eq('id', existing.id);
-    if (error) throw error;
-    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
-    return data[0];
-  } else {
-    const { data, error } = await supabase.from('carts')
-      .insert([{ user_id: user.id, product_id: productId, qty }]);
-    if (error) throw error;
-    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
-    return data[0];
-  }
+  if (existing) {
+    const { data, error } = await supabase.from('carts')
+      .update({ qty: existing.qty + qty }).eq('id', existing.id);
+    if (error) throw error;
+    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+    return data[0];
+  } else {
+    const { data, error } = await supabase.from('carts')
+      .insert([{ user_id: user.id, product_id: productId, qty }]);
+    if (error) throw error;
+    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+    return data[0];
+  }
 }
-
 
 export async function getCart() {
   const user = await getCurrentUser();
   if (!user) {
     // Guest cart: fetch product details manually
     const cart = getGuestCart();
-    if (cart.length === 0) return [];
-    const ids = cart.map(item => item.product_id);
+    if (!Array.isArray(cart) || cart.length === 0) return [];
+
+    // Filter to ensure only valid items are included before mapping
+    const validCart = cart.filter(item => item && item.product_id && item.qty);
+    if (validCart.length === 0) return [];
+    
+    const ids = validCart.map(item => item.product_id);
     const { data: products, error } = await supabase.from('products')
       .select('*')
       .in('id', ids);
-    if (error) throw error;
-    return cart.map(item => ({
+    
+    if (error) {
+      console.error("Supabase fetch error:", error);
+      throw error;
+    }
+    
+    // Create the final cart object with product details
+    return validCart.map(item => ({
       id: item.product_id,
       qty: item.qty,
       products: products.find(p => p.id === item.product_id)
@@ -137,29 +165,28 @@ export async function getCart() {
 }
 
 export async function removeFromCart(cartRowId) {
-  const user = await getCurrentUser();
-  if (!user) {
-    // Remove from guest cart
-    let cart = getGuestCart().filter(item => item.product_id !== cartRowId);
-    saveGuestCart(cart);
-    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
-    return;
-  }
-  const { data, error } = await supabase.from('carts').delete().eq('id', cartRowId);
-  if (error) throw error;
-  window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
-  return data;
+  const user = await getCurrentUser();
+  if (!user) {
+    // Remove from guest cart
+    let cart = getGuestCart().filter(item => item.product_id !== cartRowId);
+    saveGuestCart(cart);
+    window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+    return;
+  }
+  const { data, error } = await supabase.from('carts').delete().eq('id', cartRowId);
+  if (error) throw error;
+  window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+  return data;
 }
-
 
 // And also add it to your clearCart function
 export async function clearCart() {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Not authenticated');
-  const { data, error } = await supabase.from('carts').delete().eq('user_id', user.id);
-  if (error) throw error;
-  window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
-  return data;
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+  const { data, error } = await supabase.from('carts').delete().eq('user_id', user.id);
+  if (error) throw error;
+  window.dispatchEvent(new Event('cart-updated')); // Dispatch the event
+  return data;
 }
 
 // --- Render products dynamically ---
@@ -197,7 +224,12 @@ export async function renderProducts() {
       try {
         const productId = btn.closest('.product').dataset.id;
         await addToCart(productId, 1);
-        showCartMessage('Item added to cart!');
+
+        // Fetch updated cart and calculate total count
+        const cart = await getCart();
+        const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+
+        showCartMessage(`Cart updated! Total items: ${totalCount}`);
       } catch (e) { alert(e.message); }
     };
   });

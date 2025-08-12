@@ -47,18 +47,18 @@ header {
   z-index: 1000;
   background-color: var(--background);
   color: var(--white);
-  padding: 0.5px 0;    /* vertical padding only */
-  width: 100%;      /* ensure full width */
+  padding: 0.5px 0;  /* vertical padding only */
+  width: 100%;     /* ensure full width */
   box-shadow: 0 6px 5px rgba(0,0,0,0.1);
-  margin: 0;        /* remove any default margin */
+  margin: 0;       /* remove any default margin */
   transition: all 0.3s ease; /* This makes the transition smooth */
 }
 
 header:hover {
   background-color: var(--background-hover);
   color: var(--white);
-  padding: 0.5px 0;    /* vertical padding only */
-  width: 100%;      /* ensure full width */
+  padding: 0.5px 0;  /* vertical padding only */
+  width: 100%;     /* ensure full width */
   box-shadow: 0 6px 5px rgba(0, 0, 0, 0.2);
   margin: 0; /* Adjust this to the color you want on hover */
   font-size: 16.3px;
@@ -68,7 +68,7 @@ header:hover {
 header .container {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 1rem;    /* horizontal padding inside container */
+  padding: 0 1rem;  /* horizontal padding inside container */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1007,75 +1007,5 @@ form input[type="tel"]:focus {
   }
   .order-summary, .checkout-form {
     flex: 1 1 100%;
-  }
-}
-/* Checkout and Stripe-specific Styles */
-
-#payment-element {
-  margin-bottom: 1.5rem;
-  /* This is where the Stripe form is injected */
-}
-
-#payment-message {
-  color: var(--accent-orange);
-  font-size: 1rem;
-  line-height: 1.4;
-  padding-top: 12px;
-  text-align: center;
-}
-
-/* Override your primary button style for the Stripe submit button */
-#payment-submit-button {
-  background-color: var(--accent-orange);
-  color: var(--white);
-  border: none;
-  padding: 1rem 2.5rem;
-  border-radius: 30px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 1.8rem;
-  display: block;
-  width: 100%;
-  text-align: center;
-  box-shadow: 0px 4px 5.5px 0px rgba(0, 0, 0, 0.07); /* Add Stripe's subtle shadow */
-}
-
-#payment-submit-button:hover,
-#payment-submit-button:focus {
-  background-color: var(--accent-yellow);
-  color: var(--dark-green);
-  outline: none;
-}
-
-#payment-submit-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed; /* Changed from 'default' for better UX */
-}
-
-/* Spinner style */
-.spinner {
-  display: none; /* Hide by default */
-  width: 1.5rem;
-  height: 1.5rem;
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top-color: var(--white);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto;
-}
-
-.spinner.visible {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
   }
 }
