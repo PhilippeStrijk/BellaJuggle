@@ -272,3 +272,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   await renderProducts();
   await applyAdminUI();
 });
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const products = document.querySelectorAll(".product");
+  products.forEach((el, idx) => {
+    el.style.animationDelay = `${idx * 0.4}s`;
+  });
+});

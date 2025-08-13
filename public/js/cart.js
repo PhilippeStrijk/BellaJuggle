@@ -62,3 +62,10 @@ async function renderCart() {
 }
 
 document.addEventListener('DOMContentLoaded', renderCart);
+
+document.addEventListener("DOMContentLoaded", () => {
+  const products = document.querySelectorAll(".cart-items");
+  products.forEach((el, idx) => {
+    el.style.animationDelay = `${idx * 0.2}s`;
+  });
+});
