@@ -1,0 +1,65 @@
+{% extends "base.njk" %}
+
+{% block title %}Checkout - BellaJuggle{% endblock %}
+
+{% block content %}
+<div class="container checkout-container">
+    <h1>Checkout</h1>
+    <div class="checkout-content">
+        <div class="checkout-form">
+            <form id="checkoutForm">
+                <fieldset>
+                    <legend>Shipping & Billing Information</legend>
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" required>
+
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" required>
+
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Payment Details</legend>
+                    <div id="payment-element"></div>
+                    <div id="payment-message" class="hidden"></div>
+                </fieldset>
+                
+                <div class="cart-summary" id="cart-summary">
+                    <div class="summary-line">
+                        <span>Subtotal</span>
+                        <span id="cart-subtotal">€0.00</span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Shipping</span>
+                        <span id="cart-shipping">€10.00</span>
+                    </div>
+                    <div class="summary-line total">
+                        <span>Total</span>
+                        <span id="cart-total">€0.00</span>
+                    </div>
+                </div>
+
+                <button type="submit" id="payment-submit-button" class="btn btn-primary">
+                    <span id="button-text">Pay now</span>
+                </button>
+            </form>
+        </div>
+
+        <div class="order-summary">
+            <h2>Your Order</h2>
+            <div id="cart-items" class="cart-items"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://js.stripe.com/v3/"></script>
+    <script type="module" src="/static/js/cart.js"></script>
+    <script type="module" src="/static/js/checkout.js"></script>
+{% endblock %}

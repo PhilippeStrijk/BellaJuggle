@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ title | default('BellaJuggle') }}</title>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+  <script>
+    window.SUPABASE_URL = "https://ckoreyuitbfckdztbolt.supabase.co"; // Supabase URL
+    window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrb3JleXVpdGJmY2tkenRib2x0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Njg2MDYsImV4cCI6MjA3MDM0NDYwNn0.UNWJQWUEZfnFLDpU2y_uE5mOByjeL6e8FBchzr-Fksk"; // Supabase Key
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/static/js/shop.js" type="module"></script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="logo-link">
+        <img src="/static/images/icon.png" alt="BellaJuggle Logo" class="logo" />
+      </a>
+      <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop">Shop</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/cart">Cart</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <div class="container-footer">
+      <p>&copy; 2025 BellaJuggle. All rights reserved.</p>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+  <script src="/static/js/cart-count.js"></script>
+</body>
+</html>
