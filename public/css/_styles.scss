@@ -1,0 +1,131 @@
+// ==========================================================================
+// Base Styling & Variables
+// ==========================================================================
+
+// Global brand colors and typography
+$primary-color: #5d5d81;
+$secondary-color: #f7f7f7;
+$accent-color: #e5989b;
+$text-color: #333;
+$font-family-primary: 'Arial', sans-serif;
+$font-family-secondary: 'Georgia', serif;
+
+// Animation variables for consistency
+$animation-duration: 0.3s;
+$exit-animation-duration: 0.5s;
+$easing-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+$easing-attention: cubic-bezier(.17,.86,.85,.9);
+
+// ==========================================================================
+// Reusable Mixins and Keyframes
+// ==========================================================================
+
+@mixin button-hover {
+  @media (prefers-reduced-motion: no-preference) {
+    transition: transform $animation-duration $easing-smooth, box-shadow $animation-duration $easing-smooth;
+    &:hover, &:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOutRight {
+  to {
+    opacity: 0;
+    transform: translateX(100vw);
+  }
+}
+
+// ==========================================================================
+// Core Components & Layout
+// ==========================================================================
+
+body {
+  font-family: $font-family-primary;
+  color: $text-color;
+  background-color: $secondary-color;
+  line-height: 1.6;
+}
+
+header, nav, main, footer {
+  padding: 1rem;
+}
+
+button {
+  background-color: $primary-color;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  @include button-hover;
+}
+
+a {
+  color: $accent-color;
+  text-decoration: none;
+  transition: color $animation-duration $easing-smooth;
+  &:hover, &:focus {
+    color: darken($accent-color, 15%);
+  }
+}
+
+// ==========================================================================
+// Cart Item Animations
+// ==========================================================================
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  margin-bottom: 10px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  position: relative;
+  
+  // Transition for hover and subtle changes
+  @media (prefers-reduced-motion: no-preference) {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// Class added by JS for new items
+.cart-item.is-new {
+  animation: fadeIn 0.4s $easing-smooth forwards;
+}
+
+// Class added by JS for removal
+.cart-item.is-removing {
+  animation: fadeOutRight $exit-animation-duration $easing-smooth forwards;
+}
+
+// Accessibility check to disable all animations for users with a preference for reduced motion
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms!important;
+    animation-iteration-count: 1!important;
+    transition-duration: 0.01ms!important;
+    scroll-behavior: auto!important;
+  }
+}

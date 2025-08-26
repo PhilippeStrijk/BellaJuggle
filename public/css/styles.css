@@ -1,15 +1,22 @@
-/* styles.css */
-
 :root {
-  --background: #FFF5DD;
-  --background-hover: #fffaedff;
-  --accent-yellow: rgba(255, 218, 139, 1);
-  --accent-orange: #FA8F37;
-  --accent-green: #309639;
-  --dark-green: #005526;
-  --text-color: #333333;
-  --white: #ffffff;
+  /* Base */
+  --color-bg: hsl(210, 30%, 98%);       /* bright near-white */
+  --color-bg-hover: hsl(210, 30%, 94%); /* subtle hover */
+
+  /* Accents */
+  --color-accent-yellow: hsl(45, 100%, 47%);   /* golden yellow */
+  --color-accent-orange: hsl(25, 95%, 50%);    /* punchy orange */
+  --color-accent-green: hsl(150, 75%, 35%);    /* vivid teal-green */
+  --color-dark-green: hsl(160, 100%, 18%);     /* deep emerald */
+
+  /* Neutrals */
+  --color-text: hsl(220, 20%, 10%);   /* almost black */
+  --color-black: #000;                /* true black */
+  --color-gray-900: hsl(220, 15%, 15%); /* rich dark gray */
+  --color-gray-700: hsl(220, 10%, 40%); /* medium gray */
+  --color-white: #fff;
 }
+
 
 * {
   box-sizing: border-box;
